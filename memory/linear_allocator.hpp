@@ -28,7 +28,7 @@
  * std::max_align_t which ensures that fundamental types are aligned to the
  * largest type on the current platform. However, when trying to allocate for
  * complex types which may be larger, this doesn't work. One solution would be
- * to take a note from *
+ * to take a note from
  * [std::pmr::memory_resource::allocate](https://en.cppreference.com/cpp/memory/memory_resource/allocate)
  * and have the alignment as a default parameter.
  *

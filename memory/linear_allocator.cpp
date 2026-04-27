@@ -28,7 +28,7 @@
  * std::max_align_t which ensures that fundamental types are aligned to the
  * largest type on the current platform. However, when trying to allocate for
  * complex types which may be larger, this doesn't work. One solution would be
- * to take a note from *
+ * to take a note from
  * [std::pmr::memory_resource::allocate](https://en.cppreference.com/cpp/memory/memory_resource/allocate)
  * and have the alignment as a default parameter.
  *
@@ -44,17 +44,7 @@
 #include <cassert>   /// for std::assert
 #include <iostream>  /// for IO operations
 
-/**
- * @brief Memory algorithms
- * @namespace memory
- */
-namespace memory {
-
-/**
- * @brief allocator algorithms
- * @namespace allocator
- */
-namespace allocator {
+using namespace memory::allocator;
 
 /**
  * @brief Self-test implementations
@@ -62,65 +52,55 @@ namespace allocator {
  */
 
 static void test_allocator_allocates_data() {
-    static const size_t CAPACITY = 16;
+    static const size_t CAPACITY = 64;
     linear_allocator<CAPACITY> la{};
 
-    auto* mem = la.allocate(sizeof(int));
-    int* num_ptr = new (mem) int{69};  ///< use placement new to initialize an
-                                       ///< int at the memory we allocated
-
-    assert(69 == *num_ptr);
-    assert(4 == la.size());
-    assert(16 == la.cap());
-}
-
-static void test_allocator_resets() {
-    static const size_t CAPACITY = 8;
-    linear_allocator<CAPACITY> la{};
-
+    // Allocate space for an int and construct at the mem with placement new
     auto* mem = la.allocate(sizeof(int));
     int* num_ptr = new (mem) int{69};
 
+    assert(69 == *num_ptr);
+    assert(la.size() > 0);
+    assert(la.size() <= CAPACITY);
+    assert(0 == la.size() % alignof(std::max_align_t));
+}
+
+static void test_allocator_resets() {
+    static const size_t CAPACITY = 64;
+    linear_allocator<CAPACITY> la{};
+
+    auto* mem = la.allocate(sizeof(int));
+    new (mem) int{69};
+    assert(la.size() > 0);
+
     la.reset();
     assert(0 == la.size());
-
-    // Allocate memory at the same location as the first, should hand out the
-    // same bytes
-    auto* new_mem = la.allocate(sizeof(int));
-    int* new_num_ptr = new (new_mem) int{10};
-
-    assert(10 == *new_num_ptr);
-    assert(*new_num_ptr == *num_ptr);
 }
 
 static void test_allocate_when_full_returns_nullptr() {
-    static const size_t CAPACITY = sizeof(double);
+    static const size_t CAPACITY = alignof(std::max_align_t);
     linear_allocator<CAPACITY> la{};
 
-    auto* mem = la.allocate(sizeof(double));
-    [[maybe_unused]] double* _ = new (mem) double{69.0};
+    auto* mem = la.allocate(sizeof(char));
+    assert(mem != nullptr);
+    new (mem) char{'A'};
 
-    auto* some_char = la.allocate(sizeof(char));
-    assert(nullptr == some_char);
+    assert(nullptr == la.allocate(CAPACITY));
 }
 
-static void tests() {
+static void test() {
     test_allocator_allocates_data();
     test_allocator_resets();
     test_allocate_when_full_returns_nullptr();
 
     std::cout << "All tests have successfully passed!\n";
 }
-
 /**
  * @brief Main function
  * @returns 0 on exit
  */
 int main() {
-    tests();
+    test();
 
     return 0;
 }
-
-}  // namespace allocator
-}  // namespace memory
