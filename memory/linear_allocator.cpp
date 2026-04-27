@@ -98,7 +98,7 @@ static void test_allocate_when_full_returns_nullptr() {
     linear_allocator<CAPACITY> la{};
 
     auto* mem = la.allocate(sizeof(double));
-    double* _ = new (mem) double{69.0};
+    [[maybe_unused]] double* _ = new (mem) double{69.0};
 
     auto* some_char = la.allocate(sizeof(char));
     assert(nullptr == some_char);
