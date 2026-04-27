@@ -23,13 +23,12 @@
  * for that reason there is no need for a de-allocate function.
  *
  *
- * @details
  * Key constraints and limitations of this example:
  * - As mentioned above, this implementation has the buffer aligned to the
  * std::max_align_t which ensures that fundamental types are aligned to the
  * largest type on the current platform. However, when trying to allocate for
- * complex types that are larger, this isn't enough. One solution would be
- * to take a note from
+ * complex types which may be larger, this doesn't work. One solution would be
+ * to take a note from *
  * [std::pmr::memory_resource::allocate](https://en.cppreference.com/cpp/memory/memory_resource/allocate)
  * and have the alignment as a default parameter.
  *

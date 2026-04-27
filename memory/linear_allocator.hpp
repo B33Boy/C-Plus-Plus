@@ -23,7 +23,6 @@
  * for that reason there is no need for a de-allocate function.
  *
  *
- * @details
  * Key constraints and limitations of this example:
  * - As mentioned above, this implementation has the buffer aligned to the
  * std::max_align_t which ensures that fundamental types are aligned to the
