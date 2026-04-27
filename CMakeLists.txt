@@ -51,6 +51,7 @@ add_subdirectory(range_queries)
 add_subdirectory(search)
 add_subdirectory(sorting)
 add_subdirectory(strings)
+add_subdirectory(memory)
 
 cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0057 NEW)
