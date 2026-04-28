@@ -67,7 +67,7 @@ class linear_allocator {
 
     // ================= Special Member Functions =================
     /**
-     * For simplicity, we will disallow copying or moving the allocator.
+     * For simplicity, we will disable copying or moving the allocator.
      */
 
     ~linear_allocator() = default;
@@ -110,21 +110,21 @@ class linear_allocator {
      * @brief resets allocator to the start
      *
      */
-    void reset() noexcept { next_ = 0; }
+    constexpr void reset() noexcept { next_ = 0; }
 
     /**
-     * @brief returns size of data allocated
+     * @brief return the offset of the data allocated
      *
-     * @return size_t next position
+     * @return size_t offset
      */
-    auto size() const noexcept -> size_t { return next_; }
+    constexpr auto offset() const noexcept -> size_t { return next_; }
 
     /**
-     * @brief return capacity of the allocator
+     * @brief return the capacity of the allocator
      *
      * @return size_t capacity
      */
-    auto cap() const noexcept -> size_t { return N; }
+    constexpr auto cap() const noexcept -> size_t { return N; }
 
  private:
     static constexpr size_t alignment = alignof(std::max_align_t);
@@ -132,6 +132,24 @@ class linear_allocator {
     alignas(alignment) std::byte buffer_[N];
     size_t next_{0};
 
+    /**
+     * @brief return the next aligned offset
+     *
+     * @details
+     * Given any offset, the next aligned value is a multiple of alignment (must
+     * be power of 2). For example, for an alignment requirement of 8, if the
+     * offset is in range [0,8] it returns 8, if it's in range [9,16] it
+     * returns 16.
+     *
+     * This works by first overshooting the offset by `alignment - 1`, then
+     * masking off the low bits to round down to the nearest aligned value.
+     *
+     * This trick is only valid when alignment is a power of 2 because there is
+     * only 1 set bit (e.g. 8 is 0x1000, and 4 is 0x0100)
+     *
+     * @param offset byte offset in a buffer
+     * @return size_t aligned offset
+     */
     static constexpr auto align(size_t offset) noexcept -> size_t {
         return (offset + (alignment - 1)) & ~(alignment - 1);
     }

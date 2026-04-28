@@ -47,10 +47,9 @@
 using namespace memory::allocator;
 
 /**
- * @brief Self-test implementations
+ * @brief Tests that the allocator hands out valid aligned memory
  * @returns void
  */
-
 static void test_allocator_allocates_data() {
     static const size_t CAPACITY = 64;
     linear_allocator<CAPACITY> la{};
@@ -60,23 +59,31 @@ static void test_allocator_allocates_data() {
     int* num_ptr = new (mem) int{69};
 
     assert(69 == *num_ptr);
-    assert(la.size() > 0);
-    assert(la.size() <= CAPACITY);
-    assert(0 == la.size() % alignof(std::max_align_t));
+    assert(la.offset() > 0);
+    assert(la.offset() <= CAPACITY);
+    assert(0 == la.offset() % alignof(std::max_align_t));
 }
 
+/**
+ * @brief Tests that reset returns the offset to zero
+ * @returns void
+ */
 static void test_allocator_resets() {
     static const size_t CAPACITY = 64;
     linear_allocator<CAPACITY> la{};
 
     auto* mem = la.allocate(sizeof(int));
     new (mem) int{69};
-    assert(la.size() > 0);
+    assert(la.offset() > 0);
 
     la.reset();
-    assert(0 == la.size());
+    assert(0 == la.offset());
 }
 
+/**
+ * @brief Tests that a full allocator returns nullptr
+ * @returns void
+ */
 static void test_allocate_when_full_returns_nullptr() {
     static const size_t CAPACITY = alignof(std::max_align_t);
     linear_allocator<CAPACITY> la{};
@@ -88,6 +95,10 @@ static void test_allocate_when_full_returns_nullptr() {
     assert(nullptr == la.allocate(CAPACITY));
 }
 
+/**
+ * @brief Self-test implementations
+ * @returns void
+ */
 static void test() {
     test_allocator_allocates_data();
     test_allocator_resets();
