@@ -97,8 +97,9 @@ class linear_allocator {
         -> std::byte* {
         size_t aligned_next = linear_allocator::align(next_ + num_bytes);
 
-        if (aligned_next > N)
+        if (aligned_next > N) {
             return nullptr;
+        }
 
         auto* mem = &buffer_[next_];
         next_ = aligned_next;

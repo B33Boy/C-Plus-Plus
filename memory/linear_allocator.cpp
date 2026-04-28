@@ -44,21 +44,20 @@
 #include <cassert>   /// for std::assert
 #include <iostream>  /// for IO operations
 
-using namespace memory::allocator;
-
 /**
  * @brief Tests that the allocator hands out valid aligned memory
  * @returns void
  */
 static void test_allocator_allocates_data() {
     static const size_t CAPACITY = 64;
-    linear_allocator<CAPACITY> la{};
+    memory::allocator::linear_allocator<CAPACITY> la{};
 
-    // Allocate space for an int and construct at the mem with placement new
+    // Allocate space for an int
     auto* mem = la.allocate(sizeof(int));
-    int* num_ptr = new (mem) int{69};
+    assert(mem != nullptr);
 
-    assert(69 == *num_ptr);
+    // construct the int at the mem with placement new
+    assert(69 == *new (mem) int{69});
     assert(la.offset() > 0);
     assert(la.offset() <= CAPACITY);
     assert(0 == la.offset() % alignof(std::max_align_t));
@@ -70,9 +69,10 @@ static void test_allocator_allocates_data() {
  */
 static void test_allocator_resets() {
     static const size_t CAPACITY = 64;
-    linear_allocator<CAPACITY> la{};
+    memory::allocator::linear_allocator<CAPACITY> la{};
 
     auto* mem = la.allocate(sizeof(int));
+    assert(mem != nullptr);
     new (mem) int{69};
     assert(la.offset() > 0);
 
@@ -86,7 +86,7 @@ static void test_allocator_resets() {
  */
 static void test_allocate_when_full_returns_nullptr() {
     static const size_t CAPACITY = alignof(std::max_align_t);
-    linear_allocator<CAPACITY> la{};
+    memory::allocator::linear_allocator<CAPACITY> la{};
 
     auto* mem = la.allocate(sizeof(char));
     assert(mem != nullptr);
